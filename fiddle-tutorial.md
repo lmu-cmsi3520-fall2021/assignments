@@ -49,7 +49,7 @@ What we just said ⬆️ but to summarize:
 - Upload your video to the _Database fiddle tutorial_ assignment in Brightspace
 
 ## Specific Point Allocations
-This assignment is scored according to outcomes _1a_ to _1c_, _3c_, and _4a_ to _4f_ in the [syllabus](https://dondi.lmu.build/fall2020/cmsi486/cmsi486-fall2020-syllabus.pdf). For this particular assignment, graded categories are as follows:
+This assignment is scored according to outcomes _1a_ to _1c_, _3c_, and _4a_ to _4f_ in the [syllabus](https://dondi.lmu.build/fall2021/cmsi3520/cmsi3520-fall2021-syllabus.pdf). For this particular assignment, graded categories are as follows:
 
 | Category | Points | Outcomes |
 | -------- | -----: | -------- |
