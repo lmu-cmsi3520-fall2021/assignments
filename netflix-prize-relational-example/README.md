@@ -38,13 +38,24 @@ Don’t forget that you can use `\h` in _psql_ to get online help on any SQL sta
 ## Put the “Data” in “Database”
 Technically, once your tables are defined your database is ready to go. But…it’s empty. You can use it but you can’t do much with it until you give it some data. This is where your dataset’s files come in—it’s time to get their information into those tables.
 
-There are many ways to get data into a relational database in general and PostgreSQL in particular. For this case study, we will take a highly portable approach to doing this: feeding `INSERT` statements into _psql_. It’s highly portable because the approach is independent of any particular programming language, utility, or library—it doesn’t matter how you generate the `INSERT` statements; it just matters that you _do_ generate them.
+There are many ways to get data into a relational database in general and PostgreSQL in particular. For this case study, we will show two alternative approaches: one that is highly portable and another that is more suitable to bulk imports but a little less flexible.
 
-That said, this may not be the most efficient way to get data in there, but we’ve got to start someplace right?
+### `INSERT`: Portable but Slow
+First, the portable approach: feeding `INSERT` statements into _psql_. It’s highly portable because the approach is independent of any particular programming language, utility, or library—it doesn’t matter how you generate the `INSERT` statements; it just matters that you _do_ generate them. We will use this approach with _movie_titles.csv_ since that file isn’t very large.
 
-The [_movie_loader.py_](./movie_loader.py) and [_rating_loader.py_](./rating_loader.py) programs will read the _movie_titles.csv_ and _combined_data*.txt_ files, respectively, and print `INSERT` statements corresponding to each movie and rating record in those files. You’ll notice that _rating_loader.py_ uses similar logic to our previous preprocessor program by watching out for those movie ID lines (the ones with just a movie ID followed by a colon) and making sure that the current movie ID is included in each emitted `INSERT` statement.
+The [_movie_loader.py_](./movie_loader.py) program will read the _movie_titles.csv_ file and print `INSERT` statements corresponding to each movie record in those files.
 
-When run by themselves, the `INSERT` statements are simply printed out. Once you are satisfied that the statements are indeed correct—i.e., they will correctly add the data from the files into the database—you can then use the handy `|` directive to send those printed commands into _psql_:
+### `COPY`: Proprietary but Fast
+Due to the size of the _combined_data*.txt_ files, we will use a more efficient approach with these: this is the PostgreSQL-specific [`COPY` statement](https://www.postgresql.org/docs/current/sql-copy.html). Right there you can see why this isn’t portable—`COPY` is not standard SQL. But it will save a ton of time for very large datasets.
+
+The `COPY` statement expects data to be provided in a specific format: by default, this consists of tab-delimited lines, one line per row, with columns separated by tab characters.
+
+The [_rating_loader.py_](./rating_loader.py) program will read the _combined_data*.txt_ files and issue the `COPY` statement followed by the formatted data. The data stream ends with a line containing backslash-period (`\.`), which is `COPY`’s designated “end of data” signal. You’ll notice that _rating_loader.py_ uses similar logic to our previous preprocessor program by watching out for those movie ID lines (the ones with just a movie ID followed by a colon) and making sure that the current movie ID is included in each emitted data line.
+
+How much of a difference does `COPY` make, you might ask? See for yourself—the [_rating_insert_loader.py_](./rating_insert_loader.py) program uses the more compatible `INSERT` approach for the ratings data. Run it the way you would run _movie_loader.py_ (see below) and see how long it takes. (_Hint:_ Unless your machine is hugely fast, chances are you won’t want to wait for it to finish 🤨)
+
+### Run, PostgreSQL, Run
+When run by themselves, the `INSERT` statements or `COPY` + data lines are simply printed out. Once you are satisfied that the statements are indeed correct—i.e., they will correctly add the data from the files into the database—you can then use the handy `|` directive to send those printed commands into _psql_:
 
     python3 movie_loader.py | psql postgres://localhost/postgres
     python3 rating_loader.py | psql postgres://localhost/postgres
@@ -78,18 +89,18 @@ As with schema definition, you might need to iterate through this when you’re 
 
 ### A Note About Scale
 The Netflix Prize dataset consists of around 17,700 movies—fairly small as real datasets go. But note there are _more than **100,000,000** ratings_ in the dataset taking up more than 2 gigabytes of data—that’s the real deal! This scale means that:
-* Converting to `INSERT` statements means you’ll have more than 100 million such statements—pre-writing these commands out to a file will produce a very large file!
-* Executing 100 million `INSERT` statements into _psql_ will definitely take some time—on the order of _hours_ on current hardware
+* Converting to `COPY` + data lines or `INSERT` statements means you’ll produce more than 100 million lines—pre-writing these commands out will produce a very large file!
+* `COPY` is built for speed, but executing 100 million `INSERT` statements into _psql_ will definitely take some time—on the order of _hours_ on current hardware, possibly _days_
 
-Thus, when launching into this step of the case study, do make sure of the following:
-* Your computer has enough storage space for 100 million ratings records
-* You start the ratings load at a time when you can leave your computer running for many hours—overnight would be ideal
+Thus, when launching into this step of the case study…
+* Make sure that your computer has enough storage space for 100 million ratings records
+* If you want to try out the `INSERT` approach for something this huge, start the ratings load at a time when you can leave your computer running for many many hours—overnight (or more) would be ideal
 
-We definitely aren’t fooling around here 🧐 —but the hope is that the scale is worth it, because it will help you truly appreciate what generalized database management systems do for us. Imagine writing programs that do a sequential scan of these ratings _every single time_ you want to retrieve something from this dataset. Or better yet, just don’t imagine it and skip right to using a database 😂
+We definitely aren’t fooling around here 🧐 —but the hope is that the scale is worth it, because it will help you truly appreciate what generalized database management systems do for us. Imagine writing programs that do a sequential scan of these ratings _every single time_ you want to retrieve something from this dataset. Or better yet, just don’t imagine it and skip right to using a database 😎
 
-In case we haven’t made it clear enough yet: it will take **multiple hours** and **multiple gigabytes** to fully load PostgreSQL with the full ratings data. So plan accordingly.
+In case we haven’t made it clear enough yet: it will take **multiple gigabytes** to fully load PostgreSQL with the full ratings data. So plan accordingly.
 
-The good news is that, while this process may be running on one terminal window, you can always connect to the database concurrently on another window. So you can definitely start issuing queries and practicing things even while database loading is going on—you merely won’t have all of the data at your fingertips yet until all of the records have landed.
+The good news is that, while lengthy processes may be running on one terminal window, you can always connect to the database concurrently on another window. So you can definitely start issuing queries and practicing things even while database loading is going on—you merely won’t have all of the data at your fingertips yet until all of the records have landed.
 
 ## Time for Some Play<i>SQ</i>oo<i>L</i>
 Once the database has some data in it (doesn’t have to be completely full yet, as mentioned previously), you can start honing your SQL skills. You can start with the level of SQL shown in the [Super Basic SQL crib sheet](http://dondi.lmu.build/share/db/super-basic-sql.pdf) and the original [Netflix DB Fiddle example](https://www.db-fiddle.com/f/o2ohcGVAgHZQg4teg1s9jW/6) (minus references to the _viewer_ table)—just think of a question in plain English and see if you can translate that into a corresponding [`SELECT` statement](https://www.postgresql.org/docs/current/sql-select.html). The PostgreSQL documentation also provides a [querying tutorial](https://www.postgresql.org/docs/current/tutorial-select.html) if you want to see additional examples at a basic level.

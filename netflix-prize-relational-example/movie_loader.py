@@ -9,6 +9,11 @@ some kind of database library for the loading process, instead passing the state
 directly into a database command line utility such as `psql`.
 """
 
+# The INSERT approach is best used with a transaction. An introductory definition:
+# instead of “saving” (committing) after every statement, a transaction waits on a
+# commit until we issue the `COMMIT` command.
+print('BEGIN;')
+
 # For simplicity, we assume that the program runs where the files are located.
 MOVIE_SOURCE = 'movie_titles.csv'
 with open(MOVIE_SOURCE, 'r+', encoding='iso-8859-1') as f:
@@ -25,3 +30,6 @@ with open(MOVIE_SOURCE, 'r+', encoding='iso-8859-1') as f:
 # We wrap up by emitting an SQL statement that will update the database’s movie ID
 # counter based on the largest one that has been loaded so far.
 print('SELECT setval(\'movie_id_seq\', (SELECT MAX(id) from movie));')
+
+# _Now_ we can commit our transation.
+print('COMMIT;')
