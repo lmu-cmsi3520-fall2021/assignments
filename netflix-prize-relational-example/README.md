@@ -20,7 +20,7 @@ For [schema.sql](./schema.sql) there is also something new that wasn’t seen in
 ## Set the Table(s)
 Once your database has been planned out, it’s time to actually set it up in a running database server. Assuming that you have gotten a [PostgreSQL server up and running](http://dondi.lmu.build/share/db/postgresql-setup-day.pdf), you can pretty much feed your schema file to PostgreSQL via _psql_:
 
-    psql postgres://localhost/postgres -f schema.sql
+    psql postgresql://localhost/postgres -f schema.sql
 
 The example above uses the `-f` option of _psql_ to send a file containing SQL statements directly into the database.
 
@@ -57,15 +57,15 @@ How much of a difference does `COPY` make, you might ask? See for yourself—the
 ### Run, PostgreSQL, Run
 When run by themselves, the `INSERT` statements or `COPY` + data lines are simply printed out. Once you are satisfied that the statements are indeed correct—i.e., they will correctly add the data from the files into the database—you can then use the handy `|` directive to send those printed commands into _psql_:
 
-    python3 movie_loader.py | psql postgres://localhost/postgres
-    python3 rating_loader.py | psql postgres://localhost/postgres
+    python3 movie_loader.py | psql postgresql://localhost/postgres
+    python3 rating_loader.py | psql postgresql://localhost/postgres
 
 Alternatively, you can write the output of those programs into “SQL script” files then make _psql_ execute those files:
 
     python3 movie_loader.py > movie_data.sql
-    psql postgres://localhost/postgres -f movie_data.sql
+    psql postgresql://localhost/postgres -f movie_data.sql
     python3 rating_loader.py > rating_data.sql
-    psql postgres://localhost/postgres -f rating_data.sql
+    psql postgresql://localhost/postgres -f rating_data.sql
 
 ### Caveat Encoder
 The programs included here assume that you are operating in an all-UTF-8 environment—i.e., a system where UTF-8 encoding (remember that?) is the standard or default way to encode characters. The `initdb` template that you’ve been given also ensures that the database cluster you create is UTF-8-savvy.
@@ -325,11 +325,11 @@ A major common element with the examples is that they rely on an _environment va
 
 A very straightforward—if verbose—way to pass environment variables to a program, _for that program call only_, is to supply them as key-value pairs before the command itself. Many command line shells support this; we use it here because it’s very clean, applying only to the program on that line and leaving no side effects:
 
-    DB_URL=postgres://localhost/postgres <rest of command>
+    DB_URL=postgresql://localhost/postgres <rest of command>
 
 As you get more comfortable, you can explore setting that variable for the duration of our session… (_bash_/_zsh_ example shown)
 
-    export DB_URL=postgres://localhost/postgres
+    export DB_URL=postgresql://localhost/postgres
 
 …to storing that line in an initialization file (this is command-line shell dependent), so that the variable is always set and would no longer need to be given with every command.
 
