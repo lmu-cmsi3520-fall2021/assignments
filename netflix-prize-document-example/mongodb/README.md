@@ -18,16 +18,16 @@ Because we’re modeling ratings as arrays nested within movie documents, that m
 
 Similarly to other loaders you’ve seen, this one can be “previewed” by running `python3 rating_loader.py` by itself. This will send the _mongoimport_-ready data to _stdout_. If this output looks good to you, you can then append the piped portion and off it goes. Comparatively speaking, _mongoimport_ was around seven (7) times faster than the `INSERT`-based rating loader seen in the relational database mini-stack. (of course, this isn’t an apples-to-apples comparison—there are also “bulk load” approaches for relational databases which will likely be pretty competitive in terms for performance—but these are product-specific and less portable)
 
-Once we have our “movie documents” consisting of just _id_ and _ratings_ loaded up, the approach used by the movie loader is to now perform `updateOne` calls on the collection in order to set the movies’ _year_ and _title_—these need to be sent as commands to the _mongo_ program. As the loader scans the _movie_titles.csv_ file, it builds an `updateOne` invocation for each movie that includes its year and title:
+Once we have our “movie documents” consisting of just _id_ and _ratings_ loaded up, the approach used by the movie loader is to now perform `updateOne` calls on the collection in order to set the movies’ _year_ and _title_—these need to be sent as commands to the _mongosh_ program. As the loader scans the _movie_titles.csv_ file, it builds an `updateOne` invocation for each movie that includes its year and title:
 
-    python3 movie_loader.py | mongo mongodb://localhost
+    python3 movie_loader.py | mongosh mongodb://localhost
 
-As with the rating loader, you can run `python3 movie_loader.py` by itself first in order to see the output—this is effectively the sequence of commands that we will ask _mongo_ to perform. Piping this to `mongo mongodb://localhost` then performs the updates for real.
+As with the rating loader, you can run `python3 movie_loader.py` by itself first in order to see the output—this is effectively the sequence of commands that we will ask _mongosh_ to perform. Piping this to `mongosh mongodb://localhost` then performs the updates for real.
 
 ### MongoDB-DB-Do-overs
 You might have noticed the `--drop` argument in the _mongoimport_ command above: this ensures that the collection is always “dropped” (deleted) whenever the import happens. This helps when still perfecting the loading scheme for a given dataset.
 
-To manually do things over, you can use the `dropDatabase` method within _mongo_:
+To manually do things over, you can use the `dropDatabase` method within _mongosh_:
 
     use <database name>
     db.dropDatabase()
@@ -40,7 +40,7 @@ Although the concepts are the same for querying across most database types, the 
 ### Basic Matching and Logical Combinations
 The workhorse of MongoDB querying is its collections’ `find` method. `find` accepts a two objects, whose content and structure determine all of the desired behavior for the operation. The first object is the _query_—it determines _which_ documents are to be retrieved. The second object is the _projection_—it determines which _parts_ of which documents should be returned. (MongoDB takes the term “projection” from the relational algebra, which originated this term as the operation for extracting a subset of columns from a table or relation)
 
-All queries assume that `use <database name>` has already been invoked in _mongo_ so that the current database is the one whose collections you want to query.
+All queries assume that `use <database name>` has already been invoked in _mongosh_ so that the current database is the one whose collections you want to query.
 
 * List movies containing both `'and'` and `'of'` in their titles, sorted ascending by year then title:
 ```javascript
