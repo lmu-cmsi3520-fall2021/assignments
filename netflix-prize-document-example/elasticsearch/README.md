@@ -79,7 +79,7 @@ Once that’s done (and the _combined_data_ files are present), it’s a matter 
 
     python3 rating_loader.py
 
-Contrary to what one might expect from a loader that uses web requests to do its work, the _rating_loader.py_ compares well in performance to movie creation (via ratings) with _mongoimport_. Both loaders appear to perform very similarly—around seven (7) times faster than the `INSERT`-based relational database loader. One wonders how the relational database loader would compare if its approached were changed from `INSERT` statements to something more suited to bulk loading.
+Contrary to what one might expect from a loader that uses web requests to do its work, the _rating_loader.py_ compares well in performance to movie creation (via ratings) with _mongoimport_. Both loaders appear to perform very similarly—around seven (7) times faster than the `INSERT`-based relational database loader.
 
 ## Sample Queries
 Because Elasticsearch is document-centric, it returns, well…documents. All queries are done via the [*_search* endpoint](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html), and Elasticsearch’s “query language” consists of specially-formatted JSON payloads.
