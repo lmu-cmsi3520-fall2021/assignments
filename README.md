@@ -8,5 +8,5 @@ This repository hosts a public copy of the assignment write-ups for this course 
 - [Assignment 1018](./relational-db-mini-stack.md) Relational database mini-stack
 - [Assignment 1108](./document-db-mini-stack.md) Document-centric database mini-stack
 - [Assignment 1122](./graph-db-mini-stack.md) Graph database mini-stack
-- **Assignment 1215** <!-- [Assignment 1215](./full-db-sdk.md) --> Full database SDK
+- [Assignment 1215](./full-db-sdk.md) Full database SDK
 
